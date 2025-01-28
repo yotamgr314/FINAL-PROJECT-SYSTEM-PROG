@@ -25,6 +25,7 @@ char *request_header(const char* name)
     }
     return NULL;
 }
+
 void analyze_http(char* buf ,int rcvd){
 
 	buf[rcvd] = '\0';

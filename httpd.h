@@ -4,20 +4,20 @@
 #include <string.h>
 #include <stdio.h>
 
-//Server control functions
-
+// FUNCTIONS TO CONTROL THE HTTP SERVER
 void serve_forever(const char *PORT);
 
-//Client request
-extern char    *method,    // "GET" or "POST"
-        *uri,       // "/index.html" things before '?'
-        *qs,        // "a=1&b=2"     things after  '?'
-        *prot;      // "HTTP/1.1"
+// external variables to handle Client request.
+extern char *method; // will obtain "GET" or "POST"
+extern char *uri;    // will obtain "/index.html" and things before '?'
+extern char *qs;    // will obtain the query parameters such as "a=1&b=2" and things after '?'
+extern char *prot; // will obtain the protocol name, such as "HTTP/1.1".
 
-extern char    *payload;     // for POST
-extern int      payload_size;
+extern char *payload;     // Holds the request body for POST requests.
+extern int payload_size; // Stores the size of the POST request payload.
 
-char *request_header(const char* name);
+// Function to fetch a specific request header value by name
+char *request_header(const char* name); 
 void analyze_http(char* buf,int rcvd);
 
 //user shall implement this function
