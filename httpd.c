@@ -1,16 +1,15 @@
-#include "httpd.h"
-#include <stdio.h>
+#include "httpd.h" // Custom header for our HTTP server (contains declarations, macros, etc.)
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <signal.h>
+#include <unistd.h> // POSIX API for access to system calls (e.g., fork, dup2, close, and pipe for inter-process communication)
+#include <sys/types.h> // Defines data types used in system calls (pid_t, size_t, etc...)
+#include <sys/stat.h> // Provides functions and macros for dealing with file attributes and status (e.g., stat, chmod)
+#include <sys/socket.h> // Socket API for network communication (e.g., socket creation, bind, listen, accept)
+#include <arpa/inet.h> // Functions for working with Internet addresses (e.g., inet_ntoa, htons)
+#include <netdb.h>  // Network database functions like getaddrinfo for resolving hostnames and service names
+#include <fcntl.h> // Provides file control options (e.g., non-blocking file descriptors, O_RDONLY, O_WRONLY)
+#include <signal.h> // Signal handling for processes, used here to ignore SIGCHLD signals to avoid zombie processes
 
 #define CONNMAX 1000
 
