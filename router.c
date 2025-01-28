@@ -19,7 +19,7 @@ void route()
 {
     ROUTE_START()
 
-    ROUTE_GET("/")
+    ROUTE_GET("/") // MACRO for GET http request, defined in httpd.h
     {
         printf("HTTP/1.1 200 OK\r\n\r\n");
         printf("Hello! You are using %s", request_header("User-Agent"));
