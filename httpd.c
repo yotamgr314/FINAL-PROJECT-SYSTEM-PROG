@@ -1,32 +1,36 @@
-#include "httpd.h" // Custom header for our HTTP server (contains declarations, macros, etc.)
+#include "httpd.h" // for a custom HTTP server header (contains declarations, macros, etc..).
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h> // POSIX API for access to system calls (e.g., fork, dup2, close, and pipe for inter-process communication)
+#include <unistd.h> // For system calls (fork, dup2, close, pipe, etc..).
 #include <sys/types.h> // Defines data types used in system calls (pid_t, size_t, etc...)
 #include <sys/stat.h> // Provides functions and macros for dealing with file attributes and status (e.g., stat, chmod)
-#include <sys/socket.h> // Socket API for network communication (e.g., socket creation, bind, listen, accept)
-#include <arpa/inet.h> // Functions for working with Internet addresses (e.g., inet_ntoa, htons)
+#include <sys/socket.h> // Socket API (e.g., socket creation, bind, listen, accept).
+#include <arpa/inet.h> // Functions for IP address handling (e.g., inet_ntoa, htons).
 #include <netdb.h>  // Network database functions like getaddrinfo for resolving hostnames and service names
-#include <fcntl.h> // Provides file control options (e.g., non-blocking file descriptors, O_RDONLY, O_WRONLY)
-#include <signal.h> // Signal handling for processes, used here to ignore SIGCHLD signals to avoid zombie processes
+#include <fcntl.h> // Provides file control options (e.g., non-blocking file descriptors, O_RDONLY, O_WRONLY).
+#include <signal.h> // Signal handling for processes, SIGCHILD, etc..
 
-#define CONNMAX 1000
+#define CONNMAX 1000 // Maximum number of simultaneous client connections
 
+// Global variables for server and client management
+static int listenfd; // A global integer variable to store the server's listening socket descriptor.
+static int clients[CONNMAX]; // A global array of integers to store the socket descriptors of connected clients.
+static int clientfd; // A global integer variable to store the current client socket descriptor being handled.
 
-static int listenfd, clients[CONNMAX],clientfd;
+// Function prototypes for server initialization and error handling
 static void error(char *);
 static void startServer(const char *);
 static void respond(int);
 
 
 
-
+// the server's main while forever serving loop.
 void serve_forever(const char *PORT)
 {
-    struct sockaddr_in clientaddr;
-    socklen_t addrlen;
-    char c;    
+    struct sockaddr_in clientaddr; // Structure to obtain the client address information.
+    socklen_t addrlen; // the address length.
+    char c; 
     
     int slot=0;
     

@@ -16,17 +16,17 @@ extern char *prot; // will obtain the protocol name, such as "HTTP/1.1".
 extern char *payload;     // Holds the request body for POST requests.
 extern int payload_size; // Stores the size of the POST request payload.
 
-// Function to fetch a specific request header value by name
+// Function to fetch a specific request header value by name.
 char *request_header(const char* name); 
+
+// Function to parse HTTP request data.
 void analyze_http(char* buf,int rcvd);
 
-//user shall implement this function
+// Function to define custom routes - to be implemented by the user.
 void route();
 
 
 // Macros that define a simple routing mechanism in C.
-
-// Marks the start of the routing chain with an always-false `if (0)`
 #define ROUTE_START()       if (0) { // is simply a trick to begin a chain of } else if (...) { … }.
 
 // Defines an else-if condition that checks if `method` and `uri` match the arguments
