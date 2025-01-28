@@ -80,10 +80,11 @@ void startServer(const char *port)
     struct addrinfo *p; // A pointer used to iterate through the linked list in `res` to test each socket address until a valid one is found and successfully bound.
 
     // getaddrinfo for host
-    memset (&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+    memset (&hints, 0, sizeof(hints)); // Zero out the hints structure
+    hints.ai_family = AF_INET; //  Use IPv4
+    hints.ai_socktype = SOCK_STREAM; // use TCP Protocol.
+    hints.ai_flags = AI_PASSIVE; // Bind to all available interfaces.
+    
     if (getaddrinfo( NULL, port, &hints, &res) != 0)
     {
         perror ("getaddrinfo() error");
