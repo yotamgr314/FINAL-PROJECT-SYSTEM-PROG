@@ -19,31 +19,32 @@ static int clients[CONNMAX]; // A global array of integers to store the socket d
 static int clientfd; // A global integer variable to store the current client socket descriptor being handled.
 
 // Function prototypes for server initialization and error handling
-static void error(char *);
-static void startServer(const char *);
-static void respond(int);
+static void error(char *); 
+static void startServer(const char *); // starts the server on the specified port.
+static void respond(int); // handles client's requests. 
 
 
 
-// the server's main while forever serving loop.
+// Main server function loop: listen and handles clients connections.
 void serve_forever(const char *PORT)
 {
     struct sockaddr_in clientaddr; // Structure to obtain the client address information.
     socklen_t addrlen; // the address length.
-    char c; 
+    char c; // Unused variable, potentially for deubbgin or future use.
     
-    int slot=0;
+    int slot=0; // variable to track the next available slot for a client
     
-    printf(
-            "Server started %shttp://127.0.0.1:%s%s\n",
-            "\033[92m",PORT,"\033[0m"
-            );
 
-    // Setting all elements to -1: signifies there is no client connected
+    printf("Server started %shttp://127.0.0.1:%s%s\n","\033[92m",PORT,"\033[0m"); // print a message to indicate the server has started. 
+
+    // Setting all elements to -1 to signify that there is no connected clients.
     int i;
     for (i=0; i<CONNMAX; i++)
+    {
         clients[i]=-1;
-    startServer(PORT);
+    }
+
+    startServer(PORT); // Start the server on the specified port
     
     // Ignore SIGCHLD to avoid zombie threads
     signal(SIGCHLD,SIG_IGN);
@@ -74,7 +75,9 @@ void serve_forever(const char *PORT)
 //start server
 void startServer(const char *port)
 {
-    struct addrinfo hints, *res, *p;
+    struct addrinfo hints; // A struct used to specify criteria for selecting socket address structures, such as protocol family (IPv4), socket type (TCP), and flags (e.g., passive mode for binding).
+    struct addrinfo *res; //A pointer to a linked list of addrinfo structures returned by `getaddrinfo`. it Stores the result of getaddrinfo, which provides one or more potential socket address structures matching the criteria defined in hints.
+    struct addrinfo *p; // A pointer used to iterate through the linked list in `res` to test each socket address until a valid one is found and successfully bound.
 
     // getaddrinfo for host
     memset (&hints, 0, sizeof(hints));
