@@ -172,7 +172,7 @@ void respond(int n) // n is the socket descriptor of the newly connects client.
         // Call the router function to switch case and match the apropiate route for the current request, each route will handle the needed request and send a response directly via printf statment which are redirected to the clientSocketDescritor
         route();
 
-        // Tidy up - Flush any remaining output to ensure it's sent before closing
+        // Tidy up - if we are here it means the routers and controllers have finished their execution -(we already used printf statments to send the response to clientSocketDescritor in the router.c file) so we just need to Flush any remaining output to ensure it's sent before closing
         fflush(stdout); // Make sure any buffered output is sent to the client 
         shutdown(STDOUT_FILENO, SHUT_WR); // Shutdown writing on `stdout`, preventing further writes
         close(STDOUT_FILENO); // Close `stdout` as we no longer need it
