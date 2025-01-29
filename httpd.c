@@ -97,17 +97,36 @@ void startServer(const char *port)
         exit(1);
     }
     // socket and bind
-    for (p = res; p!=NULL; p=p->ai_next) // we iterate through all the possible addresses that getaddrinfo() func as returned, and try to bind our socket to it. upon the first the bind of the socket with an address succseed we break out of the for loop.
+    for (p = res; p!=NULL; p=p->ai_next) // we iterate through all the possible addresses  structs that getaddrinfo() func as returned, and try to bind our socket to it. upon the first the bind of the socket with an address succseed we break out of the for loop.
     {
         int option = 1;
-        listenfd = socket (p->ai_family, p->ai_socktype, 0);
-        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+        listenfd = socket (p->ai_family, p->ai_socktype, 0); // creating a socket with the parameters defined in the addresses struct that getaddrinfo returned. (each struct in that LL contains the fields defined in hints as well)
+        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)); // Set socket option SO_REUSEADDR to allow reusing the address immediately after closing
         if (listenfd == -1) continue;
-        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0)
+        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0) // Attempt to bind the socket to the current address struct in the list
         {
-            break;
+            break; // if binds sucessed exit the loop sicne we have a valid socket bound to a struct adress. 
         } 
     }
+
+// NOTE: THE EQUIVALENT TO if(getaddrinfo) in summer-bet-q5-tcp-version.
+/* sockfd = socket(AF_INET, SOCK_STREAM, 0);
+if (sockfd < 0) {
+    perror("Socket creation failed");
+    exit(EXIT_FAILURE);
+}
+
+memset(&servaddr, 0, sizeof(servaddr));
+servaddr.sin_family = AF_INET;
+servaddr.sin_addr.s_addr = INADDR_ANY;
+servaddr.sin_port = htons(PORT);
+
+if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    perror("Bind failed");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+}
+ */
     if (p==NULL)
     {
         perror ("socket() or bind()");
@@ -115,9 +134,8 @@ void startServer(const char *port)
     }
 
     freeaddrinfo(res);
-
-    // listen for incoming connections
-    if ( listen (listenfd, 1000000) != 0 )
+    
+    if ( listen (listenfd, 1000000) != 0 ) // listens la socket ha mesharet, can handle up to 1000000 waiting requests to connect. 
     {
         perror("listen() error");
         exit(1);
