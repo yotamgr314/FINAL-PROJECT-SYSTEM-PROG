@@ -79,10 +79,10 @@ void startServer(const char *port)
     struct addrinfo *res; //A pointer to a linked list of addrinfo structures returned by `getaddrinfo`. it Stores the result of getaddrinfo, which provides one or more potential socket address structures matching the criteria defined in hints.
     struct addrinfo *p; // A pointer used to iterate through the linked list in `res` to test each socket address until a valid one is found and successfully bound.
 
-    // getaddrinfo for host
+    // הגדרת כתובת השרת
     memset (&hints, 0, sizeof(hints)); // Zero out the hints structure
     hints.ai_family = AF_INET; //  Use IPv4
-    hints.ai_socktype = SOCK_STREAM; // use TCP Protocol.
+    hints.ai_socktype = SOCK_STREAM; // ---> INDICATES ITS A TCP SOCKET ! 
     hints.ai_flags = AI_PASSIVE; // Bind to all available interfaces.
     
     if (getaddrinfo( NULL, port, &hints, &res) != 0)
