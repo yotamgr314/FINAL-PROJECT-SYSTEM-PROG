@@ -162,21 +162,22 @@ void respond(int n) // n is the socket descriptor of the newly connects client.
     	else  //message received
         	 analyze_http(buf ,rcvd); // if we are here it means we mannage to recivie the content of the newly connected client from its clientSocketDescritor. and we just need to parse its HTML content by the HTML protocol implement in http_protocol.c 
 
-	 // bind clientfd to stdout, making it easier to write
-        clientfd = clients[n];
-        dup2(clientfd, STDOUT_FILENO);
-        close(clientfd);
+	 // Redirect standard output (stdout) of the server child process to the clientSocketDescritor 
+     // allowing all printf() calls to send data directly to the client - NOTE: this part replaces the send() part in summer-bet-q5-tcp-version.c since from now on we can just print to the STDO and it will be redirected to the clientSocketDescritor.
+        clientfd = clients[n]; //clientfd - now contains the clientSocketDescritor which is in the clients[n] index.
+        dup2(clientfd, STDOUT_FILENO); // makes all printf() statements output data to the client socket instead of the terminal.
+        close(clientfd); // Close the original `clientSocketDescritor`, becuse we now have access to it via the stdout of the server's child process.
 
-        // call router
+        // Call the router function to switch case and match the apropiate route for the current request, each route will handle the needed request and send a response directly via printf statment which are redirected to the clientSocketDescritor
         route();
 
-      // tidy up
-        fflush(stdout);
-        shutdown(STDOUT_FILENO, SHUT_WR);
-        close(STDOUT_FILENO);
+        // Tidy up - Flush any remaining output to ensure it's sent before closing
+        fflush(stdout); // Make sure any buffered output is sent to the client 
+        shutdown(STDOUT_FILENO, SHUT_WR); // Shutdown writing on `stdout`, preventing further writes
+        close(STDOUT_FILENO); // Close `stdout` as we no longer need it
 
-    	//Closing SOCKET
-    	shutdown(clientfd, SHUT_RDWR);         //All further send and recieve operations are DISABLED...
+        // Closing the client socket connection
+    	shutdown(clientfd, SHUT_RDWR);//All further send and recieve operations are DISABLED...
     	close(clientfd);
-    	clients[n]=-1;
+    	clients[n]=-1; // Mark the client slot as available again
 }
