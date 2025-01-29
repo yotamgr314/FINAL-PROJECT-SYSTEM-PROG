@@ -166,7 +166,8 @@ void respond(int n) // n is the socket descriptor of the newly connects client.
      // allowing all printf() calls to send data directly to the client - NOTE: this part replaces the send() part in summer-bet-q5-tcp-version.c since from now on we can just print to the STDO and it will be redirected to the clientSocketDescritor.
         clientfd = clients[n]; //clientfd - now contains the clientSocketDescritor which is in the clients[n] index.
         dup2(clientfd, STDOUT_FILENO); // makes all printf() statements output data to the client socket instead of the terminal.
-        close(clientfd); // Close the original `clientSocketDescritor`, becuse we now have access to it via the stdout of the server's child process.
+        close(clientfd); // First close: We close the original `clientfd` because it has been duplicated to `STDOUT_FILENO`.
+                         // This does NOT close the connection, since the duplicated descriptor (stdout) is still open.
 
         // Call the router function to switch case and match the apropiate route for the current request, each route will handle the needed request and send a response directly via printf statment which are redirected to the clientSocketDescritor
         route();
@@ -178,6 +179,7 @@ void respond(int n) // n is the socket descriptor of the newly connects client.
 
         // Closing the client socket connection
     	shutdown(clientfd, SHUT_RDWR);//All further send and recieve operations are DISABLED...
-    	close(clientfd);
+    	close(clientfd);// Second close: Now we fully close the socket connection.
+                        // The first close only removed the extra descriptor, but this actually terminates the connection.
     	clients[n]=-1; // Mark the client slot as available again
 }
