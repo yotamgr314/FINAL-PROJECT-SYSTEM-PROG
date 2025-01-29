@@ -1,3 +1,8 @@
+// NOTE: THIS FILE HANDLES ROUTING OF HTTP REQUESTS.
+//       01) Defines routes for GET and POST requests.
+//       02) Calls appropriate functions to handle requests.
+//       03) Implements business logic for user registration, login, and profile management.
+
 #include "httpd.h"
 #include <unistd.h>
 #include <stdio.h>

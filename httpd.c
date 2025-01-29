@@ -1,3 +1,9 @@
+// NOTE: THIS FILE CONTAINS TCP SOCKET IMPLEMENTATION.
+//       01) creates TCP socket with socket()
+//       02) binds the socket to the port.
+//       03) listens to incoming requests via listen()
+//       04) handling handshake via the accept() function.
+
 #include "httpd.h" // for a custom HTTP server header (contains declarations, macros, etc..).
 #include <stdio.h>
 #include <string.h>
@@ -85,19 +91,22 @@ void startServer(const char *port)
     hints.ai_socktype = SOCK_STREAM; // ---> INDICATES ITS A TCP SOCKET ! 
     hints.ai_flags = AI_PASSIVE; // Bind to all available interfaces.
     
-    if (getaddrinfo( NULL, port, &hints, &res) != 0)
+    if (getaddrinfo( NULL, port, &hints, &res) != 0) // func defined in #include <netdb.h> which stores in res a pointer to linked list of possible addresses that match the fields defined  in hints. etc - an address that match family - AF_INET --> supports IPV4 addressed only. hints.ai_socktype = SOCK_STREAM --> address which supports TCP sockets.  
     {
         perror ("getaddrinfo() error");
         exit(1);
     }
     // socket and bind
-    for (p = res; p!=NULL; p=p->ai_next)
+    for (p = res; p!=NULL; p=p->ai_next) // we iterate through all the possible addresses that getaddrinfo() func as returned, and try to bind our socket to it. upon the first the bind of the socket with an address succseed we break out of the for loop.
     {
         int option = 1;
         listenfd = socket (p->ai_family, p->ai_socktype, 0);
         setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
         if (listenfd == -1) continue;
-        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0) break;
+        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0)
+        {
+            break;
+        } 
     }
     if (p==NULL)
     {

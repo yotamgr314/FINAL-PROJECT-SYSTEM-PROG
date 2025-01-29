@@ -1,3 +1,7 @@
+// NOTE: THIS FILE CONTAINS DECLARATIONS FOR THE HTTP SERVER.
+//       01) Defines global variables for HTTP request handling.
+//       02) Declares functions for serving requests and routing.
+
 #ifndef _HTTPD_H___
 #define _HTTPD_H___
 

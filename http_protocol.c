@@ -1,3 +1,8 @@
+// NOTE: THIS FILE IMPLEMENTS HTTP PROTOCOL THAT WILL BE USED OVER THE TCP SOCKET PROTOCOL.
+//       01) Parses HTTP requests (method, URI, headers, payload).
+//       02) Extracts query parameters and request headers.
+//       03) Handles HTTP request processing.
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
