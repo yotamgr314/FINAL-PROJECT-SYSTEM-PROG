@@ -6,6 +6,7 @@
 // NOTE: the idea of the job - whats left to us (since are given in this template the whole TCP socket server intialization and HTTP protocol itnilization) is just to implement the controllers in the router.c - aka:
 // 01) the way the each route in the server reponse to a new request, that means the send() part of the TCP socket... but remember that each printf statement in the router.c file is like a sent() function since we redirected the STDO of each newly created child to the clientSocketDescriptor 
 //     and after we return from void route() defined in router.c we just flush the STDO which sends the entier printf statments as a response to the client.
+//     so this work is mainly demonstarte the send() part and not the entire funcitonality of setting up a basic TCP server.(and the way we interacte with HTTP protocol above the socket API).
 
 #include <stdio.h>
 #include <string.h>
