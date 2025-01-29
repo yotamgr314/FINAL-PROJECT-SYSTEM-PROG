@@ -55,26 +55,26 @@ void serve_forever(const char *PORT)
     // Ignore SIGCHLD to avoid zombie threads
     signal(SIGCHLD,SIG_IGN);
 
-    // ACCEPT connections
-    while (1)
+    // thats the inifnite while loop sheba ha socket ha mesharet continutes to accept newly connected. we are here only after the startServer func was called, which has inner call to listen() func API. so at this point we are listening la socket ha meshaeret.
+    while (1) 
     {
         addrlen = sizeof(clientaddr);
-        clients[slot] = accept (listenfd, (struct sockaddr *) &clientaddr, &addrlen);
+        clients[slot] = accept (listenfd, (struct sockaddr *) &clientaddr, &addrlen);// accept returns a socket descriptor which assigned to the clients array bamakom a slot, listenfd hu ha file descriptor shel a socket a mehsaret.
 
         if (clients[slot]<0)
         {
-            perror("accept() error");
+            perror("accept() error"); // if the acccept failed we send an error
         }
-        else
+        else // only if accept did not failed, aka returned value > 0 it means it returned the file descriotpor of the newly connected client. 
         {
-            if ( fork()==0 )
+            if ( fork()==0 ) // creates a child to handle the newly accepted connection.
             {
-                respond(slot);
+                respond(slot); // this function is incharge of reciving the request of the newly accept connection, etc - recv(), and sendto(). we pass the respond() the index of the newly connected client inside the clients array. that index comtains its socket dicriptor.
                 exit(0);
             }
         }
 
-        while (clients[slot]!=-1) slot = (slot+1)%CONNMAX;
+        while (clients[slot]!=-1) slot = (slot+1)%CONNMAX; //  now clients[slut] points to the next avaliable slut in the clients array and we conitnute to the next iteration which calls accept() 
     }
 }
 
@@ -146,21 +146,21 @@ if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
 static char *buf;
 
 //client connection
-void respond(int n)
+void respond(int n) // n is the socket descriptor of the newly connects client.
 {
-
     	int rcvd, fd, bytes_read;
     	char *ptr;
 
-    	buf = malloc(65535);
-    	rcvd=recv(clients[n], buf, 65535, 0);
+    	buf = malloc(65535); // allocated enough space for the buffer to contain the newly client request content.
+
+    	rcvd=recv(clients[n], buf, 65535, 0); // we use the recv() to recivie the request content from the clientSocketDescriptor which is in the - clients[n]. and saving it into buffer.
     
     	if (rcvd<0)    // receive error
         	fprintf(stderr,("recv() error\n"));
     	else if (rcvd==0)    // receive socket closed
         	fprintf(stderr,"Client disconnected unexpectedly.\n");
     	else  //message received
-        	 analyze_http(buf ,rcvd);
+        	 analyze_http(buf ,rcvd); // if we are here it means we mannage to recivie the content of the newly connected client from its clientSocketDescritor. and we just need to parse its HTML content by the HTML protocol implement in http_protocol.c 
 
 	 // bind clientfd to stdout, making it easier to write
         clientfd = clients[n];
