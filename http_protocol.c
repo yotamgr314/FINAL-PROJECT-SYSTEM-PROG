@@ -2,6 +2,10 @@
 //       01) Parses HTTP requests (method, URI, headers, payload).
 //       02) Extracts query parameters and request headers.
 //       03) Handles HTTP request processing.
+// NOTE: i do not think we need to know how to implement the parsing of an HTTP request. it just given to us so we can use HTTP protocol over the TCP socket implemenation.
+// NOTE: the idea of the job - whats left to us (since are given in this template the whole TCP socket server intialization and HTTP protocol itnilization) is just to implement the controllers in the router.c - aka:
+// 01) the way the each route in the server reponse to a new request, that means the send() part of the TCP socket... but remember that each printf statement in the router.c file is like a sent() function since we redirected the STDO of each newly created child to the clientSocketDescriptor 
+//     and after we return from void route() defined in router.c we just flush the STDO which sends the entier printf statments as a response to the client.
 
 #include <stdio.h>
 #include <string.h>
