@@ -30,6 +30,7 @@ void route()
     {
         printf("HTTP/1.1 200 OK\r\n\r\n"); // write to the STDO which is redirected to the clientSocketDescritor a standard HTTP 200 OK.
         printf("Hello! You are using %s", request_header("User-Agent"));  // write to the STDO which is redirected to the clientSocketDescritor the request header parsed in http_protocol.c, once we return the from void route() to the httpd.c we make call fflush(stdout)Make sure any buffered output is sent to the clientSocketDescritor.  
+        // load the lion image.
     }
 
     ROUTE_GET("/pass")
@@ -44,6 +45,35 @@ void route()
         printf("Wow, seems that you POSTed %d bytes. \r\n", payload_size); // as explained above, and in addition it sends the payload size that was attached to the reqeust, which was declared as extern int in httpd.h and parsed and assign a value by the analayzed_http defined in the http_protocol.c file..
         printf("Fetch the data using `payload` variable."); // as explained above. 
     }
+
+    ROUTE_POST("/register")
+    {
+        /* implement registeration:
+            01) writing to the password.txt file the email and password the user has entered in the form.
+        */
+    }
+
+    ROUTE_POST("/login")
+    {
+        /* implement login:
+            01) read the password.txt file and search for a matching password.
+        */
+    }
+
+    ROUTE_POST("/enterData")
+    {
+        /* 
+            write to the files/data.txt the input the user has entered in the form. 
+        */
+    }
+
+    ROUTE_POST("/editData")
+    {
+        /* 
+            write to the files/data.txt the input the user has edit in the form. 
+        */
+    }
+
   
     ROUTE_END()
 }
