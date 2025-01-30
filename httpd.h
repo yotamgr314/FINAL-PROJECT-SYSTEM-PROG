@@ -30,7 +30,7 @@ void analyze_http(char* buf,int rcvd);
 void route();
 
 
-// Macros that define a simple routing mechanism in C.
+// Macros that define a simple routing mechanism in C. - these are the routers.
 #define ROUTE_START()       if (0) { // is simply a trick to begin a chain of } else if (...) { … }.
 
 // Defines an else-if condition that checks if `method` and `uri` match the arguments
@@ -40,6 +40,8 @@ void route();
 #define ROUTE_GET(URI)      ROUTE("GET", URI)
 
 // a GET macro shortcut that for a nother macro shortcut to a ROUTE func. calls the ROUTE macro which is a macro to a function as well, it calls ROUTE func with a "POST" as first parameter, and URI that the client sent as second parameter.("POST", URI).
+#define ROUTE_POST(URI)     ROUTE("POST", URI)
+
 #define ROUTE_POST(URI)     ROUTE("POST", URI)
 
 // Ends the chain of else-if routes. If no routes matched, respond with 500.

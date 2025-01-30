@@ -48,6 +48,7 @@ void route()
 
     ROUTE_POST("/register")
     {
+        printf("its the registration page");
         /* implement registeration:
             01) writing to the password.txt file the email and password the user has entered in the form.
         */
