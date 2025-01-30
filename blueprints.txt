@@ -1,0 +1,31 @@
+UDP SOCKET SETPS:
+1) declare two addresses structs, one for the client, the other for the TCP server.
+2) create a socket. --> socket(AF_INET value, SOCK_STREAM) - SOCK_STREAM indicates its a TCP socket., save the socket() return value - its the socket descriptor. 
+3) memeset the server struct address (meapes oto). 
+4) intilized the server struct values, to AF_INET, INVADDR_ANY, and sin_port. 
+5) binds the socket to the server adress's struct. 
+6) call the listen() func with the socket descriptor, and the maximum amount of connections waiting to be accept that the server will handle. 
+7) create an infinite while loop, in its body make an clientsocketDescriptor = accept(fd_of_a_socket_amesharet, unitnlized_client_address_struct from step1) 
+if accept failed --> cliendFD < 0, we conitniute and skip the next while loop iteration.
+else step 8) 
+8) if we are here it means that a connection has been established, via the accept API call, and clientsocketDescriptor holds the newly connected client's socket descriptor,hence we can create a new child via fork and let take care of the request. once forking and inside the child process we need to close(socket_a_mesharet) becuse the child does not need to listen to the socket_aMeshearet, his father already doing it. 
+ a) inside the child process we will call the recv(clientsocketDescriptor, inputBuffer, buffSize, 0) 
+     and recivie the client request body, handle it the way it needed in the question. 
+ b) send to the client an answer from the server by wirting the answer into the buffer and sending the buffer via the send(clientsocketDescriptor, buffer, terminator of the buffer, 0)
+c) close the client tcp socket connection, via close(clientsocketDescriptor), and exit(0); to terminate the child process that was create to handle this request. 
+
+
+TCP SOCKET SETPS:
+1) 
+הצהרה על שני sockaddr_struct אחד לserver ואחד לclient. 
+נאתחל רק את sockaddr_struct של הserver נאתחל בשדות המתאימים כמו : 
+הגדרת כתובת ה שדרת.
+IPV
+מס' PORT.
+יצירת socket מסוג UDP. 
+יצירת Bind בין הsocket אל ה sockaddr_struct  של הserver. 
+יצירת while ראשי שבתוכו השרת מאזים לבקשות ומטפל בהם. 
+נשתמש ב API של recvfrom כדי להאזין לבקשות, נשים לב כי לאחר שrecvfrom חוזרת היא מאתחלת את הפרמטר של הsockaddr_struct של הclient עם כל השדות הנדרשים להמשך התקשורת, כמו הכתובת חזרה אליה ניתן לשלוח תשובה וכו..
+מתחת לקריאת ה recvfrom נבצע fork אשר יוליד ילד עבור הבקשה החדשה שנכנס בrecvfrom. (היות ו recvfrom  הוא blocking ניתן להניח כי הfork יתבצע אם ורק אם הקתבלה בקשה בתוך recvfrom). 
+בתוך הchild process שיצרנו עבור הבקשה נטפל במה שהבקשה הספציפית דרשה. 
+נשלח תשובה מהשרת ללקוח על ידי sendto()f ונעבר לה כפרמטר את ה sockaddr_struct  של הclient כדי שהיא תדע לאן לשלוח. ונעביר לה גם buffer שאליו כתבנו את התשובה של השרת. והbuffer הזה ישלח ללקוח. 
