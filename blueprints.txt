@@ -1,21 +1,48 @@
+TCP SOCKET SERVER SHORT BLUEPRINTS: 
+1) Declate Address Structures for client and server.
+2) Create the TCP Socket().
+3) Zero out Server Address Structure. then Initialize its values.
+4) Bind() the Socket to the Server Address struct.
+5) listen() for Incoming Connections
+6) create a whileForever loop -  inside it call accept().
+7) use fork() to Handle the Client Request.
+8) close() serverSocket in the child process. 
+9) recv() to receive the client message body in the buffer variable. 
+10) handle the request and send() a response to the client. and after that close(cleintSocket) and exit(0);
+
+
+TCP SOCKET STEPS:
+1) declare two sockaddr_in addresses structs, one for the client, the other for the TCP server. (servaddr, and cliaddr).
+2) create the server TCP socket--> call int serverSocketMesharetDescriptor= socket(AF_INET value, SOCK_STREAM) - SOCK_STREAM indicates its a TCP socket. 
+3) Use memset(&servaddr, 0, sizeof(servaddr)); to zero out the servaddr struct.
+4) intilized the server struct values: servaddr.sin_family = AF_INET, servaddr.sin_addr.s_addr = INADDR_ANY,servaddr.sin_port = htons(PORT);
+5) Call bind() to attach the socket to the initialized server address struct.
+6) call the listen(serverSocketMesharetDescriptor,5) func with the socket descriptor, and the maximum amount of connections waiting to be accept that the server will handle. 
+7) create a whileForever loop, in its body make an clientsocketDescriptor = accept(serverSocketMesharetDescriptor,(struct sockaddr *)&cliaddr, &len) which blocks execution until client connects.
+    a) if clientsocketDescriptor<0 skip the next whileForever iteration.
+9) if we are here it means that a connection has been established, via the accept API call, and clientsocketDescriptor holds the newly connected client's socket descriptor.
+    1) hence we will Use fork() to create a new child process to handle the client request, inside the child process:
+    2) close(serverSocketMesharetDescriptor) becuse the child does not need to listen to the socket_aMeshearet, his father already doing it. 
+    3) receive data from the client using - int clientMessRes = recv(clientsocketDescriptor, inputBuffer, buffSize, 0) - and recivie the client request body in buffer, and handle the request according to the question demands.. 
+    4) send a response back to the client from the server by wirting the answer into the buffer and sending the buffer via the send(clientsocketDescriptor, buffer, terminator of the buffer, 0)
+    5) close the client tcp socket connection, via close(clientsocketDescriptor), and exit(0); to terminate the child process that was create to handle this request. 
+
+
+
+UDP SHORT BLUEPRINTS:
+1) Declare Address Structures for client and server.
+2) Create the UDP Socket().
+3) Zero out Server Address Structure. then Initialize its values.
+4) Bind() the Socket to the Server Address struct.
+5) create a whileForever loop - inside it call recvfrom().
+6) Fork() a Child Process to Handle the client request.
+7) sendto() - to send the buffer containing the response back to the client.
+8) close(socketMesharet), and exit(0), and continue to the next iteration, outside of the loop close(socketMesharet), and return 0;
+
+
+
+
 UDP SOCKET SETPS:
-1) declare two addresses structs, one for the client, the other for the TCP server.
-2) create a socket. --> socket(AF_INET value, SOCK_STREAM) - SOCK_STREAM indicates its a TCP socket., save the socket() return value - its the socket descriptor. 
-3) memeset the server struct address (meapes oto). 
-4) intilized the server struct values, to AF_INET, INVADDR_ANY, and sin_port. 
-5) binds the socket to the server adress's struct. 
-6) call the listen() func with the socket descriptor, and the maximum amount of connections waiting to be accept that the server will handle. 
-7) create an infinite while loop, in its body make an clientsocketDescriptor = accept(fd_of_a_socket_amesharet, unitnlized_client_address_struct from step1) 
-if accept failed --> cliendFD < 0, we conitniute and skip the next while loop iteration.
-else step 8) 
-8) if we are here it means that a connection has been established, via the accept API call, and clientsocketDescriptor holds the newly connected client's socket descriptor,hence we can create a new child via fork and let take care of the request. once forking and inside the child process we need to close(socket_a_mesharet) becuse the child does not need to listen to the socket_aMeshearet, his father already doing it. 
- a) inside the child process we will call the recv(clientsocketDescriptor, inputBuffer, buffSize, 0) 
-     and recivie the client request body, handle it the way it needed in the question. 
- b) send to the client an answer from the server by wirting the answer into the buffer and sending the buffer via the send(clientsocketDescriptor, buffer, terminator of the buffer, 0)
-c) close the client tcp socket connection, via close(clientsocketDescriptor), and exit(0); to terminate the child process that was create to handle this request. 
-
-
-TCP SOCKET SETPS:
 1) 
 הצהרה על שני sockaddr_struct אחד לserver ואחד לclient. 
 נאתחל רק את sockaddr_struct של הserver נאתחל בשדות המתאימים כמו : 
