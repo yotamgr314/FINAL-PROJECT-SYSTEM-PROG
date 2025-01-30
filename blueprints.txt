@@ -11,7 +11,7 @@ TCP SOCKET SERVER SHORT BLUEPRINTS:
 10) handle the request and send() a response to the client. and after that close(cleintSocket) and exit(0);
 
 
-TCP SOCKET STEPS:
+TCP SERVER SOCKET DETAILED STEPS:
 1) declare two sockaddr_in addresses structs, one for the client, the other for the TCP server. (servaddr, and cliaddr).
 2) create the server TCP socket--> call int serverSocketMesharetDescriptor= socket(AF_INET value, SOCK_STREAM) - SOCK_STREAM indicates its a TCP socket. 
 3) Use memset(&servaddr, 0, sizeof(servaddr)); to zero out the servaddr struct.
@@ -29,7 +29,7 @@ TCP SOCKET STEPS:
 
 
 
-UDP SHORT BLUEPRINTS:
+UDP SOCKET SERVER SHORT BLUEPRINTS:
 1) Declare Address Structures for client and server.
 2) Create the UDP Socket().
 3) Zero out Server Address Structure. then Initialize its values.
@@ -40,19 +40,15 @@ UDP SHORT BLUEPRINTS:
 8) close(socketMesharet), and exit(0), and continue to the next iteration, outside of the loop close(socketMesharet), and return 0;
 
 
-
-
-UDP SOCKET SETPS:
-1) 
-הצהרה על שני sockaddr_struct אחד לserver ואחד לclient. 
-נאתחל רק את sockaddr_struct של הserver נאתחל בשדות המתאימים כמו : 
-הגדרת כתובת ה שדרת.
-IPV
-מס' PORT.
-יצירת socket מסוג UDP. 
-יצירת Bind בין הsocket אל ה sockaddr_struct  של הserver. 
-יצירת while ראשי שבתוכו השרת מאזים לבקשות ומטפל בהם. 
-נשתמש ב API של recvfrom כדי להאזין לבקשות, נשים לב כי לאחר שrecvfrom חוזרת היא מאתחלת את הפרמטר של הsockaddr_struct של הclient עם כל השדות הנדרשים להמשך התקשורת, כמו הכתובת חזרה אליה ניתן לשלוח תשובה וכו..
-מתחת לקריאת ה recvfrom נבצע fork אשר יוליד ילד עבור הבקשה החדשה שנכנס בrecvfrom. (היות ו recvfrom  הוא blocking ניתן להניח כי הfork יתבצע אם ורק אם הקתבלה בקשה בתוך recvfrom). 
-בתוך הchild process שיצרנו עבור הבקשה נטפל במה שהבקשה הספציפית דרשה. 
-נשלח תשובה מהשרת ללקוח על ידי sendto()f ונעבר לה כפרמטר את ה sockaddr_struct  של הclient כדי שהיא תדע לאן לשלוח. ונעביר לה גם buffer שאליו כתבנו את התשובה של השרת. והbuffer הזה ישלח ללקוח. 
+UDP SOCKET SERVER DETAILED STEPS:
+1) declare two sockaddr_in addresses structs, one for the client, the other for the UDP server. (servaddr, and cliaddr).
+2) create the server UDP socket--> call int serverSocketMesharetDescriptor= socket(AF_INET value, SOCK__DGRAM) - SOCK_DGRAM indicates its a UDP socket. 
+3) Use memset(&servaddr, 0, sizeof(servaddr)); to zero out the servaddr struct.
+4) intilized the server struct values: servaddr.sin_family = AF_INET, servaddr.sin_addr.s_addr = INADDR_ANY,servaddr.sin_port = htons(PORT);
+5) Call bind() to attach the socket to the initialized server address struct.
+7) create a whileForever loop, in its body - int clientMessRes = recvfrom(serverSocketMesharetDescriptor, buffer, BUFSIZE, MSG_WAITALL, (struct sockaddr *)&cliaddr, &len);
+8) buffer[clientMessRes] = '\0'
+    1) we will Use fork() to create a new child process to handle the client request, inside the child process:
+    2) send a response back to the client from the server by wirting the answer into the buffer and sending the buffer via the sendto(serverSocketMesharetDescriptor, buffer, n, MSG_CONFIRM, (const struct sockaddr *)&cliaddr, len);
+    3) close(serverSocketMesharetDescriptor), exit(0) and the whileForever loop continutes...
+    4) outside the whileForeverLoop close(serverSocketMesharetDescriptor); and return 0;
