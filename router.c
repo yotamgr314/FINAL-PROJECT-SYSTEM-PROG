@@ -178,26 +178,26 @@ void route()
 
     ROUTE_POST("/register")
     {
-            char username[100] = {0};
-            sscanf(payload, "username=%[^&]", username); //, Payload is analyzed and parsed in the given http_protocl_c file . the sscanf Start scanning from where "username=" appears in the string. and Extract everything after "username=" until & is found. (becuse it expects it to be in application/x-www-form-urlencoded which means the body of the request is "username=john&password=123")
-            if (user_exists(username)) 
+        char username[100] = {0};
+        sscanf(payload, "username=%[^&]", username); //, Payload is analyzed and parsed in the given http_protocl_c file . the sscanf Start scanning from where "username=" appears in the string. and Extract everything after "username=" until & is found. (becuse it expects it to be in application/x-www-form-urlencoded which means the body of the request is "username=john&password=123")
+        if (user_exists(username)) 
+        {
+            printf("HTTP/1.1 302 Found\r\n"); // 302 reponse for automatice redirection.
+            printf("Location: /?response=RegisterFailedUserAleardyExists\r\n\r\n"); // redirect the page to location: (specified location.)
+            fflush(stdout);
+        } else {
+            if (register_user(payload)) 
             {
-                printf("HTTP/1.1 302 Found\r\n"); // 302 reponse for automatice redirection.
-                printf("Location: /?response=RegisterFailedUserAleardyExists\r\n\r\n"); // redirect the page to location: (specified location.)
+                printf("HTTP/1.1 302 Found\r\n"); // write to the STDO which is redirected to the clientSocketDescritor a standard HTTP 302 Found, as the route was found. - once we return the from void route() to the httpd.c we make call fflush(stdout)Make sure any buffered output is sent to the clientSocketDescritor.  
+                printf("Location: /?response=RegisterSuccess\r\n\r\n"); // as explained above.
                 fflush(stdout);
-            } else {
-                if (register_user(payload)) 
-                {
-                    printf("HTTP/1.1 302 Found\r\n"); // write to the STDO which is redirected to the clientSocketDescritor a standard HTTP 302 Found, as the route was found. - once we return the from void route() to the httpd.c we make call fflush(stdout)Make sure any buffered output is sent to the clientSocketDescritor.  
-                    printf("Location: /?response=RegisterSuccess\r\n\r\n"); // as explained above.
-                    fflush(stdout);
-                } else 
-                {
-                    printf("HTTP/1.1 302 Found\r\n");
-                    printf("Location: /?response=dbErrorFailedToAppendNewData\r\n\r\n");
-                    fflush(stdout);
-                }
+            } else 
+            {
+                printf("HTTP/1.1 302 Found\r\n");
+                printf("Location: /?response=dbErrorFailedToAppendNewData\r\n\r\n");
+                fflush(stdout);
             }
+        }
     }
 
     // Route for serving the reference made by index.html to index_style.css --> once the index.html is sent to the browser the browser will make another GET request for each of the referenced files inside index.html.
@@ -218,15 +218,11 @@ void route()
         send_file("./files/lion_sleeping.jpg", "image/jpeg");
     }
 
-    // Route for serving the reference made by profile_page.html to lion_awake.jpg --> once the profile_page.html is sent to the browser the browser will make another GET request for each of the referenced files inside index.html.
-    ROUTE_GET("/lion_awake.jpg")
-    {
-        send_file("./files/lion_awake.jpg", "image/jpeg");
-    }
-
     // Route for handling user login
     ROUTE_POST("/login")
     {
+        fprintf(stderr, "[DEBUG] Received Login Payload: %s\n", payload);
+
         if (login_user(payload)) 
         {
             char username[100] = {0};
@@ -234,19 +230,63 @@ void route()
             printf("HTTP/1.1 302 Found\r\n");
             printf("Location: /profile?username=%s\r\n\r\n", username);
             fflush(stdout);
-        } else {
+        } 
+        else 
+        {
             printf("HTTP/1.1 302 Found\r\n");
             printf("Location: /?response=LoginFailedUserDoesNotExist\r\n\r\n");
             fflush(stdout);
         }
     }
 
+
 /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 
-    // NOTE: THESE ARE THE ROTUES FOR PROFILE_PAGE.HTML
-    ROUTE_GET("/profile_page.css")
+
+    // Route for serving the profile page
+    ROUTE_GET("/profile")
     {
-        send_file("./files/profile_page.css", "text/css");
+        send_file("./files/profile_page.html", "text/html");
+    }
+
+    // Route for serving the reference made by profile_page.html to lion_awake.jpg --> once the profile_page.html is sent to the browser the browser will make another GET request for each of the referenced files inside index.html.
+    ROUTE_GET("/lion_awake.jpg")
+    {
+        send_file("./files/lion_awake.jpg", "image/jpeg");
+    }
+
+    // Route for serving profile data
+    ROUTE_GET("/profileinfo")
+    {
+        char username[100] = {0};
+        char filepath[BUF_SIZE] = {0};
+        char profile_data[BUF_SIZE] = {0};
+
+        sscanf(qs, "username=%s", username);
+
+        snprintf(filepath, sizeof(filepath), "./data/%s.data", username);
+
+        FILE *file = fopen(filepath, "r");
+        if (!file) {
+            printf("HTTP/1.1 404 Not Found\r\n\r\n");
+            printf(" ");
+            fflush(stdout);
+            return;
+        }
+
+        fread(profile_data, 1, sizeof(profile_data), file);
+        fclose(file);
+
+        printf("HTTP/1.1 200 OK\r\n");
+        printf("Content-Type: text/plain\r\n\r\n");
+        printf("%s", profile_data);
+        fflush(stdout);
+    }
+
+
+    ROUTE_GET("/profile_page.js")
+    {
+        send_file("./files/profile_page.js", "application/javascript");
     }
 
 

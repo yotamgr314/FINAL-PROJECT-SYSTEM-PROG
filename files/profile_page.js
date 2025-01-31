@@ -15,7 +15,11 @@ function debounce(func, delay) {
     };
 }
 
-const username = new URLSearchParams(window.location.search).get("username");
+// Get the username from the URL and decode it
+let username = new URLSearchParams(window.location.search).get("username");
+if (username) {
+    username = decodeURIComponent(username); // Decode special characters like %40 to @
+}
 
 // Fetch the user profile
 function fetchUserProfile() {
