@@ -16,16 +16,27 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <ctype.h>
 
 #define BUF_SIZE 1024
 
 // CONTROLERS SECTION
 /* ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Function to decode URL-encoded characters (e.g., `%40` → `@`), The email entered yotamkiki@gmail.com appears as yotamkiki%40gmail.com. the  @ symbol is URL-encoded as %40 (because form data is sent using application/x-www-form-urlencoded
-void url_decode(char *src, char *dest) {
+
+// Function to trim whitespace and newlines from a string
+void trim_newline(char *str) {
+    int len = strlen(str);
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r' || isspace(str[len - 1]))) {
+        str[len - 1] = '\0';
+        len--;
+    }
+}
+
+void url_decode(const char *src, char *dest) {
     char code[3] = {0};
     while (*src) {
-        if (*src == '%' && src[1] && src[2]) {
+        if (*src == '%' && isxdigit(src[1]) && isxdigit(src[2])) {
             code[0] = src[1];
             code[1] = src[2];
             *dest++ = (char)strtol(code, NULL, 16);  // Convert `%xx` to char
@@ -45,23 +56,45 @@ void url_decode(char *src, char *dest) {
 int user_exists(const char* username) {
     FILE *file = fopen("./files/password.txt", "r");
     if (!file) {
+        fprintf(stderr, "[ERROR] Could not open password.txt\n");
         return 0;
     }
 
-    char stored_payload[BUF_SIZE];
-    char stored_username[100];
-    while (fgets(stored_payload, sizeof(stored_payload), file))
-    {
-        sscanf(stored_payload, "username=%[^&]", stored_username); // scans into stored_payload all the usernames from passwordFileDescritor and if a username matches the newUserName it returns 1, else 0.
-        if (strcmp(username, stored_username) == 0) {
-            fclose(file);
-            return 1;
+    char stored_payload[BUF_SIZE];  // Line buffer
+    char stored_username[100];      // Extracted username
+    char decoded_stored_username[100];  // Decoded stored username
+    char decoded_input_username[100];   // Decoded input username
+
+    // Decode input username
+    url_decode(username, decoded_input_username);
+    fprintf(stderr, "[DEBUG] Checking if user exists: %s\n", decoded_input_username);
+
+    while (fgets(stored_payload, sizeof(stored_payload), file)) {// scans into stored_payload all the usernames from passwordFileDescritor and if a username matches the newUserName it returns 1, else 0.
+        trim_newline(stored_payload);  // Remove newlines
+
+        // Extract username from stored data
+        if (sscanf(stored_payload, "username=%99[^&]", stored_username) == 1) {
+            trim_newline(stored_username);  // Trim whitespace
+
+            // Decode stored username
+            url_decode(stored_username, decoded_stored_username);
+
+            fprintf(stderr, "[DEBUG] Comparing input: %s with stored: %s\n",
+                    decoded_input_username, decoded_stored_username);
+
+            if (strcmp(decoded_input_username, decoded_stored_username) == 0) {
+                fclose(file);
+                return 1;  // Username exists
+            }
         }
     }
 
     fclose(file);
-    return 0;
+    return 0;  // Username does not exist
 }
+
+
+
 
 
 // writes into the password.txt the new user name and password in application/x-www-form-urlencoded format - username=yotamgr@gmail.com&password=123. returns 0 if username do not exist in the payload(body) of the request. 1 if succeed to write into password.txt.
@@ -123,7 +156,11 @@ void send_file(const char *file_path, const char *content_type)
 {
     int fd = open(file_path, O_RDONLY); // gets the index.html/css/imagefile file descritor. 
     if (fd == -1) {
-        printf("HTTP/1.1 404 Not Found\r\n\r\n");
+        // Send proper 404 response
+        printf("HTTP/1.1 404 Not Found\r\n");
+        printf("Content-Type: text/plain\r\n");
+        printf("Connection: close\r\n");
+        printf("\r\n");  // Ensure correct separation of headers and body
         printf("Error: Could not open %s.\r\n", file_path);
         fflush(stdout);
         return;
@@ -132,12 +169,16 @@ void send_file(const char *file_path, const char *content_type)
     char buffer[BUF_SIZE];
     ssize_t bytes_read;
 
+    // Send headers
     printf("HTTP/1.1 200 OK\r\n");
-    printf("Content-Type: %s\r\n\r\n", content_type);
+    printf("Content-Type: %s\r\n", content_type);
+    printf("Connection: close\r\n");
+    printf("\r\n");  // Ensure proper separation before content
     fflush(stdout);
 
-    while ((bytes_read = read(fd, buffer, BUF_SIZE)) > 0) {// read the index.html/css/image file content its all bytes in the end..
-        fwrite(buffer, 1, bytes_read, stdout); // writes the index.html/css/image read from the buffer into the STDOUT.
+    // Send file content
+    while ((bytes_read = read(fd, buffer, BUF_SIZE)) > 0) {
+        fwrite(buffer, 1, bytes_read, stdout); 
         fflush(stdout);
     }
 
@@ -233,27 +274,28 @@ void route() {
     }
 
     // Route for handling user registration
-    ROUTE_POST("/register") 
-    {
-        char username[100] = {0};
-        sscanf(payload, "username=%[^&]", username);  //, Payload is analyzed and parsed in the given http_protocl_c file . the sscanf Start scanning from where "username=" appears in the string. and Extract everything after "username=" until & is found. (becuse it expects it to be in application/x-www-form-urlencoded which means the body of the request is "username=john&password=123")
+ROUTE_POST("/register") 
+{
+    char username[100] = {0};
+    sscanf(payload, "username=%99[^&]", username);
+    trim_newline(username); // Ensure clean input
 
-        if (user_exists(username)) {
-            printf("HTTP/1.1 302 Found\r\n"); // 302 reponse for automatice redirection.
-            printf("Location: /?response=RegisterFailed\r\n\r\n"); // redirect the page to location: (specified location.)
+    if (user_exists(username)) {
+        printf("HTTP/1.1 302 Found\r\n"); 
+        printf("Location: /?response=RegisterFailed\r\n\r\n"); 
+        fflush(stdout);
+    } else {
+        if (register_user(payload)) { 
+            printf("HTTP/1.1 302 Found\r\n"); // write to the STDO which is redirected to the clientSocketDescritor a standard HTTP 302 Found, as the route was found. - once we return the from void route() to the httpd.c we make call fflush(stdout)Make sure any buffered output is sent to the clientSocketDescritor.
+            printf("Location: /?response=RegisterSuccess\r\n\r\n");  // as explained above but write to it a redirect path.
             fflush(stdout);
         } else {
-            if (register_user(payload)) { 
-                printf("HTTP/1.1 302 Found\r\n"); // write to the STDO which is redirected to the clientSocketDescritor a standard HTTP 302 Found, as the route was found. - once we return the from void route() to the httpd.c we make call fflush(stdout)Make sure any buffered output is sent to the clientSocketDescritor.  
-                printf("Location: /?response=RegisterSuccess\r\n\r\n");  // as explained above but write to it a redirect path.
-                fflush(stdout);
-            } else {
-                printf("HTTP/1.1 302 Found\r\n");
-                printf("Location: /?response=RegisterFailed\r\n\r\n");
-                fflush(stdout);
-            }
+            printf("HTTP/1.1 302 Found\r\n");
+            printf("Location: /?response=RegisterFailed\r\n\r\n");
+            fflush(stdout);
         }
     }
+}
 
     // Route for handling user login
     ROUTE_POST("/login")
@@ -270,7 +312,6 @@ void route() {
             fflush(stdout);
         }
     }
-
     // Route for updating profile information
     ROUTE_POST("/profileinfo")
     {
