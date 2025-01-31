@@ -1,72 +1,68 @@
 // Logout functionality
-document.getElementById('logoutBtn').addEventListener('click', function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
     // Redirect to log out route
-    window.location.href = '/logout';
-});
-
-// Debounce function to prevent sending too many requests at once
-function debounce(func, delay) {
+    window.location.href = "/logout";
+  });
+  
+  // Debounce function to prevent sending too many requests at once
+  function debounce(func, delay) {
     let timer;
-    return function(...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
     };
-}
-
-// Get the username from the URL and decode it
-let username = new URLSearchParams(window.location.search).get("username");
-if (username) {
-    username = decodeURIComponent(username); // Decode special characters like %40 to @
-}
-
-// Fetch the user profile
-function fetchUserProfile() {
+  }
+  
+  const username = new URLSearchParams(window.location.search).get("username");
+  
+  // Fetch the user profile
+  function fetchUserProfile() {
     fetch(`/profileinfo?username=${username}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'text/plain'
-        }
+      method: "GET",
+      headers: {
+        "Content-Type": "text/plain",
+      },
     })
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('profileText').value = data;
-    })
-    .catch(error => {
-        console.error('Error fetching profile:', error);
-    });
-}
-
-// Update the user profile
-function updateUserProfile() {
-    const profileText = document.getElementById('profileText').value;
-
+      .then((response) => response.text())
+      .then((data) => {
+        document.getElementById("profileText").value = data;
+      })
+      .catch((error) => {
+        console.error("Error fetching profile:", error);
+      });
+  }
+  
+  function updateUserProfile() {
+    const profileText = document.getElementById("profileText").value;
+  
     fetch(`/profileinfo?username=${username}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain'
-        },
-        body: "\\" + profileText
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+      body: "\\" + profileText,
     })
-    .then(response => response.json())
-    .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         if (data.success) {
-            console.log('Profile updated successfully');
+          console.log("Profile updated successfully");
         } else {
-            console.log('Error updating profile');
+          console.log("Error updating profile");
         }
-    })
-    .catch(error => {
-        console.error('Error updating profile:', error);
-    });
-}
-
-// Fetch user profile when the page loads
-window.onload = function() {
+      })
+      .catch((error) => {
+        console.error("Error updating profile:", error);
+      });
+  }
+  
+  // Fetch user profile when the page loads
+  window.onload = function () {
     fetchUserProfile();
-};
-
-// Update the profile text area with debounce (1-second delay)
-const profileTextArea = document.getElementById('profileText');
-profileTextArea.addEventListener('input', debounce(updateUserProfile, 1000));
+  };
+  
+  // Update the profile text area with debounce (1-second delay)
+  const profileTextArea = document.getElementById("profileText");
+  profileTextArea.addEventListener("input", debounce(updateUserProfile, 1000));
+  
