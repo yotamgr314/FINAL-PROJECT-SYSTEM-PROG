@@ -227,17 +227,23 @@ void route()
         {
             char username[100] = {0};
             sscanf(payload, "username=%[^&]", username);
-            printf("HTTP/1.1 302 Found\r\n");
-            printf("Location: /profile?username=%s\r\n\r\n", username);
+
+            // Send JSON response instead of redirecting
+            printf("HTTP/1.1 200 OK\r\n");
+            printf("Content-Type: application/json\r\n\r\n");
+            printf("{\"success\": true, \"username\": \"%s\"}", username);
             fflush(stdout);
         } 
         else 
         {
-            printf("HTTP/1.1 302 Found\r\n");
-            printf("Location: /?response=LoginFailedUserDoesNotExist\r\n\r\n");
+            // Return JSON response for failed login instead of redirecting
+            printf("HTTP/1.1 401 Unauthorized\r\n");
+            printf("Content-Type: application/json\r\n\r\n");
+            printf("{\"success\": false, \"message\": \"Invalid email or password.\"}");
             fflush(stdout);
         }
     }
+
 
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */

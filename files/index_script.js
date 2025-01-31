@@ -26,10 +26,41 @@ if (response) {
 }
 
 // Handle form submission
-form.addEventListener('submit', function(event) {
+form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent the default form submission
+  
+    const formData = new FormData(form);
+    const urlEncodedData = new URLSearchParams(formData).toString();
+  
     if (document.activeElement === loginBtn) {
-        form.action = '/login';
+      fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: urlEncodedData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            window.location.href = `/profile?username=${encodeURIComponent(
+              data.username
+            )}`;
+          } else {
+            messageSpan.textContent = data.message;
+            messageSpan.classList.add("text-danger");
+            messageSpan.style.display = "inline";
+          }
+        })
+        .catch((error) => {
+          console.error("Error during login:", error);
+          messageSpan.textContent = "Login request failed.";
+          messageSpan.classList.add("text-danger");
+          messageSpan.style.display = "inline";
+        });
     } else if (document.activeElement === registerBtn) {
-        form.action = '/register';
+      form.action = "/register"; // Keep default form behavior for register
+      form.submit();
     }
-});
+  });
+  
