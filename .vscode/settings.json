@@ -5,6 +5,7 @@
     "string.h": "c",
     "stdio.h": "c",
     "errno.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "msg.h": "c"
   }
 }
